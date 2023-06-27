@@ -1,2 +1,4 @@
 Cython
 Colorama
+Customtkinter
+win10toast

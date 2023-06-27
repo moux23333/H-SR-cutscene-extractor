@@ -1,34 +1,29 @@
 import os
 import subprocess
 import time
-import random
-import argparse
-import tkinter as tk
+import customtkinter as ctk
+import win10toast
 
-from tkinter import filedialog
+from customtkinter import filedialog
 from usm import demux
-from utils import logger
 
-log = logger.log_init()
-ap = argparse.ArgumentParser()
-ap.add_argument("-u", "--usm", help="file path of USM file")
-ap.add_argument("-e", "--explorer", action="store_true", help="pick files using File Explorer")
-ap.add_argument("-o", "--open", action="store_true", help="opens video file after merging")
-args = ap.parse_args()
-root = tk.Tk()
-root.withdraw()
+fildiag = ctk.CTk()
+fildiag.withdraw()
+ctk.set_appearance_mode("dark")
+ctk.set_default_color_theme("blue")
+gui = ctk.CTk()
+gui.geometry("300x400")
+gui.title("HSR CG Extractor")
 
 odir = r"./output"
-fngivf = None
-fngacn = None
-fngaen = None
-fngajp = None
-fngakor = None
+fngivf = ""
+fngacn = ""
+fngaen = ""
+fngajp = ""
+fngakor = ""
 ofimerg = None
-inp = None
-start_time2 = None
+usmfile = ""
 converted_files = []
-globfn = None
 startstr = """
 ██╗░░██╗██╗░██████╗██████╗░
 ██║░░██║╚═╝██╔════╝██╔══██╗
@@ -47,14 +42,6 @@ startstr = """
 """
 
 
-def folconad(folder_path):
-    for file_name in os.listdir(folder_path):
-        if file_name.endswith(".mp3") and f"{globfn}" in file_name:
-            return False
-        else:
-            return True
-
-
 def extvid(usm_path, output_dir="./output"):
     a = demux.UsmDemuxer(usm_path)
     video_name, audio_names = a.export(output_dir)
@@ -67,36 +54,38 @@ def meraud(ad, v, otfi):
     subprocess.call(cmd)
 
 
-def convfi(ifi, ofi, iext, oext, ona):
-    log.info(f"Converting {ona}.{iext} > {ona}.{oext}")
+def convfi(ifi, ofi):
     ffmpeg_cmd = ["ffmpeg", "-i", ifi, ofi]
     subprocess.call(ffmpeg_cmd)
-    log.info(f"Finished Converting {ona}.{iext} > {ona}.{oext}")
     time.sleep(2)
 
+inputtt = ""
+def openfile():
+    global inputtt, usmfile
+    inputtt = filedialog.askopenfilename(filetypes=[("USM files", "*.usm")])
+    usmfile = os.path.basename(inputtt)
+    usmtext.configure(text=f"Pick USM File: {usmfile}")
+    gui.update()
+inp2 = 0
+
+def selectlang(c):
+    global inp2
+    match c:
+        case "CN":
+            inp2 = 0
+        case "EN":
+            inp2 = 1
+        case "JP":
+            inp2 = 2
+        case "KOR":
+            inp2 = 3
+
+def checkbox_event():
+    print("Checkbox event")
 
 def run():
-    global fngivf, fngacn, fngaen, fngajp, fngakor, ofimerg, inp, start_time2, globfn
-    print(startstr)
-    try:
-        if args.usm:
-            inp = str(args.usm)
-        elif args.explorer:
-            inp = filedialog.askopenfilename(filetypes=[("USM files", "*.usm")])
-        else:
-            inp = input("USM FILE: ")
-    except Exception as e:
-        log.info("No USM file selected")
-        log.err(e)
-        run()
-    start_time = time.time()
-    ext = extvid(inp)
-    log.info("Extracting video...")
-    time.sleep(random.randint(1, 3))
-    log.info(ext)
-    log.info("Converting ivf > mp4 and adx > mp3...")
-    time.sleep(random.randint(1, 4))
-
+    global fngivf, fngacn, fngaen, fngajp, fngakor, ofimerg, inp2, inputtt
+    ext = extvid(inputtt)
     for root, dirs, files in os.walk(odir):
         for file in files:
             file_path = os.path.join(root, file)
@@ -104,80 +93,55 @@ def run():
             match file_ext:
                 case ".ivf":
                     output_file = f"./output/converted/{file_name}.mp4"
-                    convfi(file_path, output_file, "ivf", "mp4", file_name)
+                    convfi(file_path, output_file)
                     converted_files.append(file_path)
                     fngivf = f"./output/converted/{file_name}.mp4"
                 case ".adx":
                     output_file = f"./output/converted/{file_name}.mp3"
-                    convfi(file_path, output_file, "adx", "mp3", file_name)
+                    convfi(file_path, output_file)
                     converted_files.append(file_path)
                     if "_0" in file_name:
                         fngacn = f"./output/converted/{file_name}.mp3"
                         ofimerg = f"./output/final/{file_name}-final.mp4"
-                        globfn = f"{file_name}-final.mp4"
                     elif "_1" in file_name:
                         fngaen = f"./output/converted/{file_name}.mp3"
                         ofimerg = f"./output/final/{file_name}-final.mp4"
-                        globfn = f"{file_name}-final.mp4"
                     elif "_2" in file_name:
                         fngajp = f"./output/converted/{file_name}.mp3"
                         ofimerg = f"./output/final/{file_name}-final.mp4"
-                        globfn = f"{file_name}-final.mp4"
                     elif "_3" in file_name:
                         fngakor = f"./output/converted/{file_name}.mp3"
                         ofimerg = f"./output/final/{file_name}-final.mp4"
-                        globfn = f"{file_name}-final.mp4"
-
-    log.info("All conversions done")
+    match inp2:
+        case 0:
+            meraud(fngacn, fngivf, ofimerg)
+        case 1:
+            meraud(fngaen, fngivf, ofimerg)
+        case 2:
+            meraud(fngajp, fngivf, ofimerg)
+        case 3:
+            meraud(fngakor, fngivf, ofimerg)
+    win10toast.ToastNotifier().show_toast("HSR CG Extractor", "Finished", duration=5)
     for file_path in converted_files:
         os.remove(file_path)
-    log.info("All .ivf/.adx has been removed")
-    end_time = time.time()
-    if "Loop" in globfn and folconad("./output/converted"):
-        pass
-    else:
-        inp2 = int(input(
-            """
-        AUDIO LANG:
-        0 = cn
-        1 = en
-        2 = jp
-        3 = kor
-        
-        Select: """))
-        try:
-            if inp2 == 0:
-                start_time2 = time.time()
-                meraud(fngacn, fngivf, ofimerg)
-            elif inp2 == 1:
-                start_time2 = time.time()
-                meraud(fngaen, fngivf, ofimerg)
-            elif inp2 == 2:
-                start_time2 = time.time()
-                meraud(fngajp, fngivf, ofimerg)
-            elif inp2 == 3:
-                start_time2 = time.time()
-                meraud(fngakor, fngivf, ofimerg)
-        except Exception as e:
-            os.system("cls")
-            log.info("Error Occurred")
-            log.err(e)
-            run()
-        log.info("Audio files merged into the main MP4")
-    end_time2 = time.time()
-    elapsed_time = end_time - start_time
-    elapsed_time2 = end_time2 - start_time2
-    final_time = elapsed_time + elapsed_time2
-    log.info(f"Finished in {round(final_time, 2)} seconds")
-    print("Final file is in ./output/final")
-    if args.open:
+    if check_var.get() == "on":
         os.system(f"start {ofimerg}")
     else:
         pass
-    print("Press Any Key To Exit")
+    exit()
 
+os.system("cls")
+print(startstr)
+usmtext = ctk.CTkLabel(gui, text="Pick USM File:")
+usmtext.pack()
+label = ctk.CTkLabel(gui, text="CTkLabel", fg_color="transparent")
+ctk.CTkButton(gui, text="Browse", command=openfile, state="normal").pack()
+ctk.CTkLabel(gui, text="Pick Language:").pack()
+ctk.CTkComboBox(gui, values=["CN", "EN", "JP", "KOR"], command=selectlang).pack()
+check_var = ctk.StringVar(value="on")
+ctk.CTkCheckBox(gui, text="Open CG after done?", command=checkbox_event,
+                           variable=check_var, onvalue="on", offvalue="off").pack()
+runbtn = ctk.CTkButton(gui, text="run", command=run).pack()
 
-if __name__ == '__main__':
-    os.system("cls")
-    run()
-    input()
+gui.mainloop()
+
