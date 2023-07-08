@@ -1,6 +1,6 @@
 # H-SR-cutscene-extractor
 ---
-USM/cg extractor for GI, made using PyCRIusm
+USM/cg extractor for HSR, made using PyCRIusm
 ---
 **prerequisite:**
 FFMPEG.EXE(Put in Repo)
