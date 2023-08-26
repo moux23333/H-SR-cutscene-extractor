@@ -3,11 +3,11 @@
 USM/cg extractor for HSR, made using PyCRIusm
 ---
 **prerequisite:**
-python
+python, 
 FFMPEG.EXE(Put in Repo)
 
 **Usage**
-Record keys using Iridium-SR for new cutscenes
+(Record keys using Iridium-SR for new cutscenes)
 ```
 install.bat
 start.bat
