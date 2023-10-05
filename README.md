@@ -12,6 +12,10 @@ Cython
 2. download [PyCriUsm](https://github.com/BUnipendix/PyCriUsm)
 3. build PyCriUSM using `python setup.py build_ext --inplace`
 4. rename the build to decrypt.pyd and replace the dll in USM folder
+5. install FFMPEG(only exe)
+6. put ffmpeg inside folder
+7. use install.bat
+8. Your good to go!
 
 
 **Usage**
