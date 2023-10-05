@@ -15,7 +15,7 @@ Cython
 5. install FFMPEG(only exe)
 6. put ffmpeg inside folder
 7. use install.bat
-8. Your good to go!
+8. You are good to go!
 
 
 **Usage**
