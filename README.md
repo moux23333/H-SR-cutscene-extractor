@@ -1,4 +1,4 @@
-# H-SR-cutscene-extractor
+# H-SR-cutscene-extractor(not optimized, but works. feel free to contribute!)
 ---
 USM/cg extractor for HSR, made using PyCRIusm
 ---
