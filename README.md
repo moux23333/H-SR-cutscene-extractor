@@ -7,6 +7,13 @@ python,
 FFMPEG.EXE(Put in Repo)
 Cython
 
+**Installing**
+1. clone this repo
+2. download [PyCriUsm](https://github.com/BUnipendix/PyCriUsm)
+3. build PyCriUSM using `python setup.py build_ext --inplace`
+4. rename the build to decrypt.pyd and replace the dll in USM folder
+
+
 **Usage**
 (Record keys using Iridium-SR for new cutscenes)
 ```
